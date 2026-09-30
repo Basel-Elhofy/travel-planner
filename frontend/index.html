@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planner - Multi-Agent System</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">✈</span>
+                    <h1>Travel Planner</h1>
+                </div>
+                <p class="subtitle">Multi-Agent AI Travel Planning System</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Input Form Section -->
+            <section class="input-section">
+                <div class="card">
+                    <h2>Plan Your Trip</h2>
+                    <p class="card-description">Enter your travel details and let our AI agents plan your perfect trip.</p>
+                    
+                    <form id="travelForm" class="form">
+                        <div class="form-group">
+                            <label for="location">Destination</label>
+                            <input type="text" id="location" name="location" placeholder="e.g., Paris, France" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="start_date">Start Date</label>
+                                <input type="date" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="duration_days">Duration (days)</label>
+                                <input type="number" id="duration_days" name="duration_days" min="1" max="30" value="7" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="budget">Budget (USD)</label>
+                                <input type="number" id="budget" name="budget" min="100" step="50" placeholder="3000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="travelers">Travelers</label>
+                                <input type="number" id="travelers" name="travelers" min="1" max="10" value="2" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="preferences">Preferences (optional)</label>
+                            <input type="text" id="preferences" name="preferences" placeholder="e.g., beach, adventure, cultural">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="btn-text">Generate Travel Plan</span>
+                            <span class="btn-loading hidden">
+                                <span class="spinner"></span>
+                                Planning...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Status Section -->
+            <section class="status-section hidden" id="statusSection">
+                <div class="card">
+                    <h2>Planning Status</h2>
+                    <div class="status-bar">
+                        <div class="status-step" data-step="planning">
+                            <div class="step-icon">📋</div>
+                            <div class="step-label">Planning</div>
+                        </div>
+                        <div class="status-connector"></div>
+                        <div class="status-step" data-step="flights">
+                            <div class="step-icon">✈</div>
+                            <div class="step-label">Flights</div>
+                        </div>
+                        <div class="status-connector"></div>
+                        <div class="status-step" data-step="hotels">
+                            <div class="step-icon">🏨</div>
+                            <div class="step-label">Hotels</div>
+                        </div>
+                        <div class="status-connector"></div>
+                        <div class="status-step" data-step="activities">
+                            <div class="step-icon">🎯</div>
+                            <div class="step-label">Activities</div>
+                        </div>
+                        <div class="status-connector"></div>
+                        <div class="status-step" data-step="budget">
+                            <div class="step-icon">💰</div>
+                            <div class="step-label">Budget</div>
+                        </div>
+                        <div class="status-connector"></div>
+                        <div class="status-step" data-step="completed">
+                            <div class="step-icon">✅</div>
+                            <div class="step-label">Done</div>
+                        </div>
+                    </div>
+                    <div class="status-message" id="statusMessage">Initializing...</div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="resultsSection">
+                <div class="card">
+                    <h2>Your Travel Plan</h2>
+                    
+                    <!-- Summary Cards -->
+                    <div class="summary-grid" id="summaryGrid">
+                        <div class="summary-card">
+                            <div class="summary-icon">✈</div>
+                            <div class="summary-info">
+                                <div class="summary-value" id="flightCount">-</div>
+                                <div class="summary-label">Flights Found</div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">🏨</div>
+                            <div class="summary-info">
+                                <div class="summary-value" id="hotelCount">-</div>
+                                <div class="summary-label">Hotels Found</div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">🎯</div>
+                            <div class="summary-info">
+                                <div class="summary-value" id="activityCount">-</div>
+                                <div class="summary-label">Activities Found</div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">💰</div>
+                            <div class="summary-info">
+                                <div class="summary-value" id="totalCost">-</div>
+                                <div class="summary-label">Total Cost</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget Bar -->
+                    <div class="budget-bar">
+                        <div class="budget-info">
+                            <span>Budget: <strong id="budgetTotal">-</strong></span>
+                            <span>Remaining: <strong id="budgetRemaining">-</strong></span>
+                        </div>
+                        <div class="budget-progress">
+                            <div class="budget-progress-fill" id="budgetProgress"></div>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <div class="download-section">
+                        <a href="#" class="btn btn-success" id="downloadBtn" download>
+                            Download Excel Plan
+                        </a>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" data-tab="flights">Flights</button>
+                            <button class="tab-btn" data-tab="hotels">Hotels</button>
+                            <button class="tab-btn" data-tab="activities">Activities</button>
+                            <button class="tab-btn" data-tab="itinerary">Itinerary</button>
+                        </div>
+
+                        <!-- Flights Tab -->
+                        <div class="tab-content active" id="flightsTab">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Airline</th>
+                                            <th>Flight</th>
+                                            <th>Departure</th>
+                                            <th>Arrival</th>
+                                            <th>Duration</th>
+                                            <th>Stops</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="flightsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Hotels Tab -->
+                        <div class="tab-content" id="hotelsTab">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Rating</th>
+                                            <th>Price/Night</th>
+                                            <th>Amenities</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="hotelsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Activities Tab -->
+                        <div class="tab-content" id="activitiesTab">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Description</th>
+                                            <th>Duration</th>
+                                            <th>Rating</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activitiesTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Itinerary Tab -->
+                        <div class="tab-content" id="itineraryTab">
+                            <div class="itinerary-container" id="itineraryContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section hidden" id="errorSection">
+                <div class="card error-card">
+                    <div class="error-icon">⚠</div>
+                    <h2>Planning Failed</h2>
+                    <p id="errorMessage">An error occurred while planning your trip.</p>
+                    <button class="btn btn-primary" onclick="resetForm()">Try Again</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Travel Planner Multi-Agent System | Built with FastAPI, Blackboard Pattern & MCP</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
